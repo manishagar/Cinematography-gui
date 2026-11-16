@@ -1,0 +1,21 @@
+.sv-admin-footer-link{color:inherit;text-decoration:underline;text-underline-offset:4px}
+.sv-admin-footer-link:hover{color:#f9a34a}
+.sv-admin-login-page{min-height:calc(100vh - 170px);display:flex;justify-content:center;align-items:center;padding:55px 16px;background:linear-gradient(135deg,#fff9f1,#ffead1)}
+.sv-admin-login-card{width:100%;max-width:440px;background:#fff;border:1px solid #f2dcc5;border-radius:18px;padding:36px;box-shadow:0 18px 50px rgba(110,52,12,.12)}
+.sv-admin-login-brand{display:flex;align-items:center;justify-content:center;gap:12px;color:#a94b0a;font-size:13px;font-weight:800;letter-spacing:1px}
+.sv-admin-login-brand img{width:52px;height:52px;object-fit:contain}
+.sv-admin-login-card h1{text-align:center;color:#a94b0a;font-family:Georgia,serif;font-size:32px;margin:18px 0 6px}
+.sv-admin-login-subtitle{text-align:center;color:#75665c;margin:0 0 28px}
+.sv-admin-login-card form{display:flex;flex-direction:column;gap:10px}
+.sv-admin-login-card label{font-size:14px;font-weight:650;color:#46352a;margin-top:8px}
+.sv-admin-login-card input{width:100%;box-sizing:border-box;padding:13px 14px;border:1px solid #d8c7b6;border-radius:9px;font:inherit;outline:none}
+.sv-admin-login-card input:focus{border-color:#e96500;box-shadow:0 0 0 3px rgba(233,101,0,.12)}
+.sv-admin-password-field{display:flex;position:relative}
+.sv-admin-password-field input{padding-right:70px}
+.sv-admin-password-field button{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:0;color:#a94b0a;cursor:pointer;padding:8px}
+.sv-admin-login-submit{margin-top:14px;padding:14px;background:#e96500;border:0;border-radius:9px;color:#fff;font-size:16px;font-weight:700;cursor:pointer}
+.sv-admin-login-submit:hover{background:#bd4d00}
+.sv-admin-login-submit:disabled{opacity:.65;cursor:wait}
+.sv-admin-login-error{color:#a51e1e;background:#fff0f0;border-radius:8px;padding:10px;font-size:13px;margin:8px 0}
+.sv-admin-back-link{display:block;text-align:center;margin-top:24px;color:#a94b0a;text-decoration:none;font-weight:600}
+@media(max-width:480px){.sv-admin-login-card{padding:25px 20px}}

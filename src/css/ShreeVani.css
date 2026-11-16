@@ -1,0 +1,651 @@
+
+.sv-page {
+  min-height: 100vh;
+  background: #fffaf5;
+  color: #33251d;
+  font-family: "Segoe UI", Arial, sans-serif;
+}
+
+.sv-page * {
+  box-sizing: border-box;
+}
+
+/* Hero */
+.sv-hero {
+  position: relative;
+  min-height: 520px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 80px 24px;
+  background:
+    linear-gradient(
+      110deg,
+      rgba(55, 23, 5, 0.83),
+      rgba(118, 47, 6, 0.55)
+    ),
+    url("/images/hero-banner.jpg")
+      center / cover no-repeat;
+  color: #fff;
+}
+
+.sv-hero-content {
+  position: relative;
+  z-index: 1;
+  max-width: 850px;
+}
+
+.sv-eyebrow {
+  display: inline-block;
+  color: #ffce87;
+  letter-spacing: 3px;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.sv-hero h1 {
+  font-family: Georgia, serif;
+  font-size: clamp(36px, 5vw, 64px);
+  line-height: 1.15;
+  margin: 0 0 20px;
+}
+
+.sv-hero p {
+  font-size: clamp(16px, 1.7vw, 20px);
+  line-height: 1.8;
+  max-width: 690px;
+  margin: 0 auto 32px;
+  color: #fff4e7;
+}
+
+.sv-hero-actions {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.sv-primary-btn,
+.sv-outline-btn,
+.sv-cta-btn {
+  display: inline-block;
+  padding: 14px 27px;
+  border-radius: 7px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: transform 0.2s, background 0.2s;
+}
+
+.sv-primary-btn {
+  background: #ef7100;
+  color: #fff;
+}
+
+.sv-outline-btn {
+  border: 1px solid #fff;
+  color: #fff;
+}
+
+.sv-primary-btn:hover,
+.sv-outline-btn:hover,
+.sv-cta-btn:hover {
+  transform: translateY(-3px);
+}
+
+.sv-primary-btn:hover {
+  background: #ce5900;
+}
+
+/* Services */
+.sv-services-section {
+  max-width: 1240px;
+  margin: auto;
+  padding: 85px 25px;
+}
+
+.sv-section-heading {
+  text-align: center;
+  margin-bottom: 42px;
+}
+
+.sv-section-heading span,
+.sv-section-kicker {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #e96500;
+}
+
+.sv-section-heading h2,
+.sv-about-content h2 {
+  font-family: Georgia, serif;
+  font-size: clamp(30px, 3.5vw, 43px);
+  color: #a94b0a;
+  margin: 12px 0;
+}
+
+.sv-section-heading p {
+  color: #74665c;
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+.sv-services-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 25px;
+}
+
+.sv-service-card {
+  background: #fff;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 6px 25px rgba(83, 43, 14, 0.08);
+  transition: transform 0.25s, box-shadow 0.25s;
+}
+
+.sv-service-card:hover {
+  transform: translateY(-7px);
+  box-shadow: 0 14px 35px rgba(83, 43, 14, 0.15);
+}
+
+.sv-service-image {
+  height: 225px;
+  overflow: hidden;
+  background: #f5e5d5;
+}
+
+.sv-service-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s;
+}
+
+.sv-service-card:hover img {
+  transform: scale(1.06);
+}
+
+.sv-service-body {
+  padding: 25px;
+}
+
+.sv-service-body h3 {
+  color: #9d470a;
+  font-size: 23px;
+  margin: 0 0 12px;
+}
+
+.sv-service-body p {
+  color: #71665e;
+  line-height: 1.7;
+  min-height: 80px;
+}
+
+.sv-service-link {
+  display: inline-block;
+  margin-top: 12px;
+  color: #e96500;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.sv-service-link:hover {
+  text-decoration: underline;
+}
+
+/* About */
+.sv-about-section {
+  background: #fff0df;
+  padding: 85px 25px;
+}
+
+.sv-about-inner {
+  max-width: 1200px;
+  margin: auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 55px;
+}
+
+.sv-about-content p {
+  color: #69584c;
+  line-height: 1.9;
+  font-size: 16px;
+  margin-bottom: 20px;
+}
+
+.sv-about-content .sv-primary-btn {
+  margin-top: 12px;
+}
+
+.sv-about-image img {
+  display: block;
+  width: 100%;
+  height: 360px;
+  object-fit: cover;
+  border-radius: 16px;
+  box-shadow: 0 12px 35px rgba(83, 43, 14, 0.15);
+}
+
+/* Contact CTA */
+.sv-cta-section {
+  text-align: center;
+  padding: 75px 20px;
+  background: linear-gradient(120deg, #d85b00, #a83c00);
+  color: white;
+}
+
+.sv-cta-section h2 {
+  font-family: Georgia, serif;
+  font-size: 38px;
+  margin: 0 0 15px;
+}
+
+.sv-cta-section p {
+  font-size: 17px;
+  margin-bottom: 30px;
+}
+
+.sv-cta-btn {
+  background: #fff;
+  color: #b44a00;
+}
+
+/* Footer */
+.sv-footer {
+  background: #321b10;
+  color: #fff3e7;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  padding: 35px 7%;
+}
+
+.sv-footer h3 {
+  font-family: Georgia, serif;
+  font-size: 23px;
+  margin: 0 0 8px;
+}
+
+.sv-footer p {
+  font-size: 13px;
+  color: #e4cbb8;
+  margin: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .sv-hero {
+    min-height: 440px;
+    padding: 65px 20px;
+  }
+
+  .sv-eyebrow {
+    font-size: 11px;
+    letter-spacing: 1px;
+  }
+
+  .sv-services-section {
+    padding: 55px 18px;
+  }
+
+  .sv-services-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .sv-service-body p {
+    min-height: 0;
+  }
+
+  .sv-about-section {
+    padding: 55px 20px;
+  }
+
+  .sv-about-inner {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+
+  .sv-about-image img {
+    height: 270px;
+  }
+
+  .sv-cta-section h2 {
+    font-size: 30px;
+  }
+
+  .sv-footer {
+    flex-direction: column;
+    text-align: center;
+    padding: 30px 20px;
+  }
+}
+
+.sv-header {
+  width: 100%;
+  background: #fff8f0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* First row */
+.sv-header-top {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  min-height: 115px;
+  padding: 12px 35px;
+}
+
+.sv-header-logo {
+  width: 95px;
+  height: 95px;
+  object-fit: contain;
+  cursor: pointer;
+}
+
+.sv-header-title h1 {
+  color: #d65a00;
+  font-size: 30px;
+  margin: 0 0 6px;
+}
+
+.sv-header-title p {
+  color: #795548;
+  font-size: 14px;
+  margin: 0;
+}
+
+/* Second row */
+.sv-navbar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 40px;
+  min-height: 55px;
+  background: #e96500;
+  padding: 10px 20px;
+}
+
+.sv-nav-link {
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: 600;
+  padding: 8px 15px;
+  border-radius: 5px;
+  transition: background 0.2s;
+}
+
+.sv-nav-link:hover,
+.sv-nav-link.active {
+  background: #ad4700;
+  color: #ffffff;
+}
+
+/* Main content */
+.sv-main {
+  padding: 70px 25px;
+  text-align: center;
+}
+
+.sv-main h1 {
+  color: #ad4700;
+  font-size: 36px;
+}
+
+.sv-main p {
+  color: #555555;
+  font-size: 17px;
+}
+
+
+/* Services dropdown container */
+.sv-dropdown {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* Services button */
+.sv-dropdown-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+/* Dropdown menu */
+.sv-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 190px;
+  background: #ffffff;
+  border-radius: 6px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+  z-index: 1000;
+  padding: 6px 0;
+  overflow: hidden;
+}
+
+/* Dropdown items */
+.sv-dropdown-item {
+  display: block;
+  padding: 12px 18px;
+  color: #333333;
+  font-size: 15px;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+
+.sv-dropdown-item:hover,
+.sv-dropdown-item.active {
+  background: #fff1e5;
+  color: #e96500;
+}
+
+
+/* Contact Page */
+.sv-contact-section {
+  min-height: 70vh;
+  padding: 65px 20px 90px;
+  background: linear-gradient(
+    135deg,
+    #fffaf5 0%,
+    #fff0dd 100%
+  );
+}
+
+.sv-contact-heading {
+  text-align: center;
+  margin-bottom: 35px;
+}
+
+.sv-contact-heading span {
+  color: #e96500;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+.sv-contact-heading h1 {
+  font-family: Georgia, serif;
+  font-size: clamp(32px, 4vw, 46px);
+  color: #a94b0a;
+  margin: 12px 0;
+}
+
+.sv-contact-heading p {
+  color: #75665c;
+  font-size: 16px;
+}
+
+.sv-contact-card {
+  max-width: 560px;
+  margin: 0 auto;
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 40px;
+  text-align: center;
+  box-shadow: 0 12px 40px rgba(95, 45, 12, 0.10);
+  border: 1px solid #f5e3d0;
+}
+
+.sv-contact-icon {
+  font-size: 36px;
+  margin-bottom: 15px;
+}
+
+.sv-contact-card h2 {
+  color: #a94b0a;
+  font-size: 24px;
+  margin: 0 0 18px;
+}
+
+.sv-contact-card h3 {
+  font-size: 21px;
+  color: #33251d;
+  margin: 0 0 16px;
+}
+
+.sv-contact-card address {
+  font-style: normal;
+  font-size: 16px;
+  line-height: 2;
+  color: #68584d;
+}
+
+.sv-map-btn {
+  display: inline-block;
+  margin-top: 25px;
+  padding: 13px 25px;
+  background: #e96500;
+  color: white;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.sv-map-btn:hover {
+  background: #bd4d00;
+  transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+  .sv-contact-section {
+    padding: 45px 15px;
+  }
+
+  .sv-contact-card {
+    padding: 28px 18px;
+  }
+
+  .sv-contact-card address {
+    font-size: 14px;
+  }
+}
+
+/* Append these styles to src/css/ShreeVani.css */
+.sv-social-section {
+  width: 100%;
+  margin-top: 28px;
+  padding-top: 24px;
+  border-top: 1px solid #f0e0d0;
+  text-align: center;
+}
+.sv-social-section h3 { color: #a94b0a; font-size: 20px; margin: 0 0 8px; }
+.sv-social-section p { color: #75665c; font-size: 14px; margin: 0 0 18px; }
+.sv-social-icons { display: flex; justify-content: center; flex-wrap: wrap; gap: 20px; }
+.sv-social-platform { display: flex; flex-direction: column; align-items: center; gap: 7px; }
+.sv-social-icon {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  color: white;
+  font-size: 26px;
+  text-decoration: none;
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+a.sv-social-icon:hover { transform: translateY(-4px); box-shadow: 0 7px 18px rgba(0,0,0,.18); }
+a.sv-social-icon:focus-visible { outline: 3px solid #e96500; outline-offset: 3px; }
+.sv-whatsapp { background: #25d366; }
+.sv-instagram { background: linear-gradient(45deg,#feda75,#fa7e1e,#d62976,#962fbf,#4f5bd5); }
+.sv-facebook { background: #1877f2; }
+.sv-social-unconfigured { opacity: .55; cursor: not-allowed; }
+.sv-social-name { font-size: 12px; color: #68584d; }
+.sv-social-section .sv-social-note { font-size: 12px; color: #8b8078; margin: 16px 0 0; }
+@media (max-width: 768px) {
+  .sv-social-icons { gap: 14px; }
+  .sv-social-icon { width: 46px; height: 46px; font-size: 23px; }
+}
+
+/* Append to src/css/ShreeVani.css */
+.sv-header-top { display: flex; align-items: center; gap: 16px; width: 100%; }
+.sv-header-title { flex: 1; min-width: 0; }
+.sv-header-admin-login { margin-left: auto; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 11px 18px; background: #e96500; color: #fff; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; white-space: nowrap; }
+.sv-header-admin-login:hover, .sv-header-admin-login:focus-visible { background: #b94f00; color: #fff; }
+@media (max-width: 600px) { .sv-header-top { gap: 8px; } .sv-header-admin-login { padding: 9px 10px; font-size: 12px; gap: 4px; } .sv-header-logo { max-width: 58px; height: auto; } .sv-header-title h1 { font-size: 18px; } .sv-header-title p { font-size: 11px; } }
+
+
+/* Mobile */
+@media (max-width: 768px) {
+  .sv-dropdown-menu {
+    min-width: 160px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .sv-dropdown-item {
+    font-size: 14px;
+    padding: 10px 14px;
+  }
+}
+
+
+/* Responsive */
+@media (max-width: 768px) {
+  .sv-header-top {
+    padding: 12px 15px;
+    gap: 12px;
+  }
+
+  .sv-header-logo {
+    width: 65px;
+    height: 65px;
+  }
+
+  .sv-header-title h1 {
+    font-size: 21px;
+  }
+
+  .sv-navbar {
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .sv-nav-link {
+    font-size: 14px;
+    padding: 8px 10px;
+  }
+
+  .sv-main {
+    padding: 45px 15px;
+  }
+
+  .sv-main h1 {
+    font-size: 27px;
+  }
+}
