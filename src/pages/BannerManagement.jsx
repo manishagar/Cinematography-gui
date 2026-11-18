@@ -167,6 +167,47 @@ export default function BannerManagement() {
           .svb-admin-shell .svd-overlay { position: fixed; inset: 0; z-index: 50; background: rgba(15, 23, 42, .5); border: 0; }
         }
         @media (prefers-reduced-motion: reduce) { .svb-admin-shell .svd-sidebar { transition: none; } }
+        .svb-admin-shell .svb-management { background: #f6f7fb; color: #131b33; box-sizing: border-box; padding: clamp(16px, 3vw, 42px); }
+        .svb-workspace { max-width: 1440px; margin-inline: auto; }
+        .svb-admin-shell .svb-editor-layout { display: grid; grid-template-columns: minmax(0, 1.12fr) minmax(0, 1fr); gap: 24px; align-items: start; }
+        .svb-admin-shell :is(.svb-form, .svb-preview, .svb-saved-tile) { min-width: 0; padding: clamp(16px, 2vw, 24px); background: #fff; border: 1px solid #e3e1ed; border-radius: 18px; box-shadow: 0 8px 22px #23174309; }
+        .svb-admin-shell .svb-form fieldset { display: grid; gap: 15px; min-width: 0; margin: 0; padding: 0; border: 0; }
+        .svb-admin-shell :is(.svb-form legend, .svb-preview h2, .svb-library h2) { font-size: 1.25rem; line-height: 1.3; margin: 0 0 16px; padding: 0; font-weight: 750; }
+        .svb-admin-shell .svb-radio-group { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 0; }
+        .svb-admin-shell .svb-radio-group label { display: flex; align-items: center; gap: 8px; padding: 10px; border: 1px solid #dfdbe9; border-radius: 10px; cursor: pointer; }
+        .svb-admin-shell .svb-radio-group label:has(input:checked) { background: #f3ecff; border-color: #8852ce; color: #48227b; }
+        .svb-admin-shell .svb-form input { accent-color: #6234a2; }
+        .svb-admin-shell .svb-field { display: grid; gap: 6px; min-width: 0; margin: 0; }
+        .svb-admin-shell .svb-field label { font-size: .875rem; font-weight: 650; }
+        .svb-admin-shell .svb-field :is(input, textarea) { box-sizing: border-box; width: 100%; min-width: 0; min-height: 42px; padding: 9px 10px; border: 1px solid #d9d5e3; border-radius: 9px; background: #fcfbfe; color: #131b33; font: inherit; }
+        .svb-admin-shell .svb-field textarea { resize: vertical; }
+        .svb-admin-shell .svb-field input[type=file] { border-style: dashed; padding: 10px; }
+        .svb-admin-shell .svb-field input::file-selector-button { padding: 7px 10px; margin-inline-end: 8px; border: 0; border-radius: 6px; background: #f0e7fc; color: #48227b; cursor: pointer; }
+        .svb-admin-shell .svb-field-pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+        .svb-admin-shell .svb-form small { color: #55546b; }
+        .svb-admin-shell .svb-primary { justify-self: start; padding: 11px 20px; background: #6234a2; color: white; border: 0; border-radius: 9px; font-weight: 700; cursor: pointer; }
+        .svb-admin-shell .svb-primary:not(:disabled):hover { background: #4e2489; }
+        .svb-admin-shell button:disabled { cursor: default; }
+        .svb-admin-shell .svb-card { overflow: hidden; border-radius: 12px; overflow-wrap: anywhere; }
+        .svb-admin-shell .svb-card-image { display: grid; place-items: center; aspect-ratio: 16 / 9; overflow: hidden; }
+        .svb-admin-shell .svb-card-image img { display: block; width: 100%; height: 100%; object-fit: cover; }
+        .svb-admin-shell .svb-placeholder { display: grid; place-items: center; aspect-ratio: 16 / 9; margin: 0; padding-inline: 12px; background: #ffffff18; text-align: center; }
+        .svb-admin-shell .svb-card-copy { padding: 16px; }
+        .svb-admin-shell .svb-card-copy h3 { margin: 0; }
+        .svb-admin-shell .svb-card-copy p { margin: 6px 0 0; }
+        .svb-library { margin-top: 30px; }
+        .svb-admin-shell .svb-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 16px; }
+        .svb-admin-shell .svb-saved-tile { display: flex; flex-direction: column; justify-content: space-between; gap: 10px; padding: 12px; }
+        .svb-admin-shell .svb-card-actions { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; color: #55546b; font-size: .82rem; }
+        .svb-admin-shell :is(.svb-card-actions, .svb-pagination) button { padding: 7px 10px; border: 1px solid #ded7eb; border-radius: 8px; background: #faf7ff; color: #48227b; font: inherit; }
+        .svb-admin-shell .svb-pagination { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px; margin-top: 16px; }
+        .svb-admin-shell .svb-list-status { padding: 24px; border: 1px dashed #d9d5e3; border-radius: 14px; background: #fff; }
+        @media (max-width: 1100px) and (min-width: 901px), (max-width: 720px) {
+          .svb-admin-shell .svb-editor-layout { grid-template-columns: minmax(0, 1fr); }
+        }
+        @media (max-width: 420px) {
+          .svb-admin-shell .svb-field-pair { grid-template-columns: minmax(0, 1fr); }
+        }
       `}</style>
       {sidebarOpen && <button type="button" className="svd-overlay" aria-label="Close sidebar" onClick={() => setSidebarOpen(false)} />}
       <aside id="svb-admin-sidebar" aria-label="Admin sidebar" className={`svd-sidebar ${sidebarOpen ? 'svd-sidebar-open' : ''}`}>
@@ -198,6 +239,7 @@ export default function BannerManagement() {
           <strong>Banner Management</strong>
         </header>
         <main className="svb-management">
+          <div className="svb-workspace">
 
     {message && <p className="svb-success" role="status">{message}</p>}
     <div className="svb-editor-layout">
@@ -220,7 +262,6 @@ export default function BannerManagement() {
             <div className="svb-field"><label htmlFor="svb-bg">Background colour</label><input id="svb-bg" name="backgroundColor" type="color" value={form.backgroundColor} onChange={change} /></div>
             <div className="svb-field"><label htmlFor="svb-fg">Text colour</label><input id="svb-fg" name="textColor" type="color" value={form.textColor} onChange={change} /></div>
           </div>
-          <div className="svb-field"><label htmlFor="svb-order">Display order</label><input id="svb-order" type="number" name="displayOrder" min="0" max="2147483647" step="1" value={form.displayOrder} onChange={change} required /></div>
           <div className="svb-field-pair">
             <div className="svb-field"><label htmlFor="svb-start">Start date (optional)</label><input id="svb-start" type="datetime-local" name="startsAt" value={form.startsAt} onChange={change} /></div>
             <div className="svb-field"><label htmlFor="svb-end">End date (optional)</label><input id="svb-end" type="datetime-local" name="endsAt" value={form.endsAt} onChange={change} /></div>
@@ -232,19 +273,20 @@ export default function BannerManagement() {
         </fieldset>
       </form>
       <aside className="svb-preview" aria-label="Banner preview">
-        <h2>Preview</h2>
+        <h2>Live preview</h2>
         <article className="svb-card" style={{ backgroundColor: form.backgroundColor, color: form.textColor }}>
           {form.bannerType === 'IMAGE' && (preview ? <div className="svb-card-image"><img src={preview} alt={form.altText || 'Selected banner'} /></div> : <p className="svb-placeholder">Choose an image to preview</p>)}
           <div className="svb-card-copy"><h3>{form.title || 'Your banner title'}</h3><p>{form.subtitle || 'Your announcement appears here.'}</p></div>
         </article>
       </aside>
     </div>
-    <h2>Saved banners</h2>
-    {loading ? <p role="status">Loading banners...</p> : listError ? <p className="svb-error" role="alert">{listError}</p> : <>
-      {!result.items.length && <p>No banners yet. Create your first banner above.</p>}
-      <div className="svb-grid">{result.items.map(banner => <div key={banner.id}>
+    <section className="svb-library" aria-labelledby="svb-saved-heading">
+    <h2 id="svb-saved-heading">Saved banners</h2>
+    {loading ? <p className="svb-list-status" role="status">Loading banners...</p> : listError ? <p className="svb-error" role="alert">{listError}</p> : <>
+      {!result.items.length && <p className="svb-list-status">No banners yet. Create your first banner above.</p>}
+      <div className="svb-grid">{result.items.map(banner => <div className="svb-saved-tile" key={banner.id}>
         <BannerCard banner={banner} admin />
-        <div className="svb-card-actions"><span>{banner.bannerType} · Order {banner.displayOrder} · {banner.active ? 'Enabled (subject to schedule)' : 'Inactive'}</span>
+        <div className="svb-card-actions"><span>{banner.bannerType} · {banner.active ? 'Enabled (subject to schedule)' : 'Inactive'}</span>
           {banner.active && <button disabled={deactivating !== null} onClick={() => deactivate(banner.id)}>{deactivating === banner.id ? 'Deactivating...' : 'Deactivate'}</button>}
         </div>
       </div>)}</div>
@@ -254,6 +296,8 @@ export default function BannerManagement() {
         <button disabled={page + 1 >= result.totalPages} onClick={() => setPage(p => p + 1)}>Next</button>
       </nav>}
     </>}
+    </section>
+          </div>
         </main>
       </div>
     </div>;
