@@ -1,79 +1,57 @@
-
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React from "react";
+import { Link } from "react-router-dom";
 import "../css/EntryPage.css";
 
-const EntryPage = () => {
-  const navigate = useNavigate();
-  const [showComingSoon, setShowComingSoon] = useState(false);
+const sites = [
+  {
+    key: "cinema",
+    name: "Vinayak Cinematography",
+    kicker: "THE ART OF STORYTELLING",
+    tagline: "Every frame tells a story.",
+    description: "Capturing moments. Creating memories that last forever.",
+    logo: "/images/vinayak logo.png",
+    path: "/vinayak-cinematography",
+    button: "Explore Cinematography",
+  },
+  {
+    key: "vani",
+    name: "Shree Vani Jagat",
+    kicker: "TRADITION · FAMILY · COMMUNITY",
+    tagline: "Rooted in tradition. United by heart.",
+    description: "Celebrating culture, connections and meaningful moments.",
+    logo: "/images/Logo.png",
+    path: "/shree-vani",
+    button: "Explore Shree Vani",
+  },
+];
 
+export default function EntryPage() {
   return (
-    <div className="entry-page">
-
-      {/* Vinayak Cinematography */}
-      <section className="website-section vinayak">
-        <div className="website-content">
-
-          <div className="logo-container">
-            <img
-              src="/images/vinayak logo.png"
-              alt="Vinayak Cinematography"
-              className="website-logo vinayak-logo"
-            />
-          </div>
-
-          <h1>Vinayak Cinematography</h1>
-
-          <button
-            type="button"
-            className="enter-button"
-            onClick={() => setShowComingSoon(true)}
-          >
-            Enter Website
-          </button>
-
-          {showComingSoon && (
-            <div className="coming-soon-message">
-              <h2>Coming Soon!</h2>
-              <p>
-                Our website is currently under development.
-                We are working hard to bring you an amazing
-                photography experience.
-              </p>
-              <p>Stay tuned. We will be launching soon!</p>
+    <main className="entry-page">
+      <div className="entry-topline"><span className="entry-topline-dot" /> TWO WORLDS · ONE BEAUTIFUL JOURNEY</div>
+      <div className="entry-grid">
+        {sites.map((site) => (
+          <section className={`entry-panel entry-panel--${site.key}`} key={site.key}>
+            <div className="entry-orbit entry-orbit--one" aria-hidden="true" />
+            <div className="entry-orbit entry-orbit--two" aria-hidden="true" />
+            <div className="entry-panel-content">
+              <span className="entry-kicker">{site.kicker}</span>
+              <div className="entry-logo-wrap">
+                <img src={site.logo} alt={`${site.name} logo`} className="entry-logo" />
+              </div>
+              <div className="entry-copy">
+                <h1>{site.name}</h1>
+                <p className="entry-tagline">{site.tagline}</p>
+                <p className="entry-description">{site.description}</p>
+              </div>
+              <Link className="entry-button" to={site.path}>
+                <span>{site.button}</span><span aria-hidden="true">↗</span>
+              </Link>
             </div>
-          )}
-
-        </div>
-      </section>
-
-      {/* Shree Vani */}
-      <section className="website-section shree-vani">
-        <div className="website-content">
-
-          <div className="logo-container">
-            <img
-              src="/images/Logo.png"
-              alt="Shree Vani"
-              className="website-logo shree-logo"
-            />
-          </div>
-
-          <h1>Shree Vani Jagat</h1>
-
-          <button
-            type="button"
-            className="enter-button"
-            onClick={() => navigate("/shree-vani")}
-          >
-            Enter Website
-          </button>
-
-        </div>
-      </section>
-
-    </div>
+            <span className="entry-bottom-label">DISCOVER YOUR EXPERIENCE <span aria-hidden="true">✦</span></span>
+          </section>
+        ))}
+      </div>
+    </main>
   );
-};
-
-export default EntryPage;
+}

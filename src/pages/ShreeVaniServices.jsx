@@ -1,17 +1,6 @@
-
 import React from "react";
+import { Link } from "react-router-dom";
 import ShreeVaniHeader from "./ShreeVaniHeader";
-
-const ShreeVaniServices = () => {
-  return (
-    <>
-      <ShreeVaniHeader />
-      <main className="sv-main">
-        <h1>Our Services</h1>
-        <p>Services information will be available here.</p>
-      </main>
-    </>
-  );
-};
-
-export default ShreeVaniServices;
+import "../css/ShreeVani.css";
+const services=[{title:"Religious",image:"/images/religious.jfif",description:"Celebrate spiritual traditions, rituals and meaningful occasions.",path:"/shree-vani/services/religious",subtitle:"FAITH & DEVOTION"},{title:"Familial",image:"/images/family.jfif",description:"Strengthening family relationships through special celebrations.",path:"/shree-vani/services/familial",subtitle:"TOGETHERNESS & JOY"},{title:"Social",image:"/images/social.jfif",description:"Connecting communities through cultural and social activities.",path:"/shree-vani/services/social",subtitle:"CULTURE & CONNECTION"}];
+export default function ShreeVaniServices(){return <div className="sv-page"><ShreeVaniHeader/><main><section className="sv-inner-hero"><span className="sv-kicker sv-light">WHAT WE OFFER</span><h1>Our <em>Services</em></h1><p>Meaningful experiences inspired by tradition, togetherness and community.</p></section><section className="sv-section sv-services-section"><div className="sv-section-heading"><div><span className="sv-kicker">EXPLORE OUR OFFERINGS</span><h2>Something for <em>Everyone</em></h2></div></div><div className="sv-services-grid">{services.map((s,i)=><Link className="sv-service-card" to={s.path} key={s.title}><div className="sv-service-image"><img src={s.image} alt={s.title}/><span className="sv-service-number">0{i+1}</span></div><div className="sv-service-body"><span className="sv-card-kicker">{s.subtitle}</span><h3>{s.title}</h3><p>{s.description}</p><span className="sv-service-link">Explore service <span>↗</span></span></div></Link>)}</div></section><section className="sv-cta-section"><h2>Have Something <em>in Mind?</em></h2><p>Reach out to learn more about our services.</p><Link to="/shree-vani/contact" className="sv-btn sv-btn-gold">Contact Us ↗</Link></section></main></div>}

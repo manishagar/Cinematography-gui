@@ -20,7 +20,7 @@ const menuItems = [
 const initial = {
   bannerType: 'IMAGE', title: '', subtitle: '', altText: '',
   backgroundColor: '#0f172a', textColor: '#ffffff',
-  displayOrder: 0, active: true, startsAt: '', endsAt: '',
+  active: true, startsAt: '', endsAt: '',
 };
 export default function BannerManagement() {
   const navigate = useNavigate();
@@ -115,14 +115,12 @@ export default function BannerManagement() {
     setError(''); setMessage('');
     if (!form.title.trim()) { setError('Enter a title.'); return; }
     if (form.bannerType === 'IMAGE' && !file) { setError('Choose a banner image.'); return; }
-    const order = Number(form.displayOrder);
-    if (!Number.isInteger(order) || order < 0 || order > 2147483647) { setError('Display order must be a nonnegative whole number.'); return; }
     const startsAt = form.startsAt ? new Date(form.startsAt).toISOString() : null;
     const endsAt = form.endsAt ? new Date(form.endsAt).toISOString() : null;
     if (startsAt && endsAt && new Date(endsAt) <= new Date(startsAt)) { setError('End date must be after start date.'); return; }
     savingRef.current = true; setSaving(true);
     try {
-      await createBanner({ ...form, title: form.title.trim(), displayOrder: order, startsAt, endsAt }, file);
+      await createBanner({ ...form, title: form.title.trim(), startsAt, endsAt }, file);
       setMessage('Banner saved successfully.'); setForm(initial); setFile(null);
       if (fileInput.current) fileInput.current.value = '';
       setPage(0); setReload(value => value + 1);
@@ -139,76 +137,6 @@ export default function BannerManagement() {
     finally { setDeactivating(null); }
   }
   return <div className="svd-app svb-admin-shell">
-      <style>{`
-        .svb-admin-shell { min-height: 100vh; background: #f5f7fb; }
-        .svb-admin-shell .svd-sidebar { width: 258px; position: fixed; inset: 0 auto 0 0; height: 100dvh; display: flex; flex-direction: column; background: #192f4b; color: #fff; z-index: 60; overflow-y: auto; }
-        .svb-admin-shell .svd-logo { display: flex; gap: 14px; align-items: center; padding: 20px 24px; border-bottom: 1px solid #30435c; }
-        .svb-admin-shell .svd-logo strong { display: block; color: #fff; font-size: 23px; line-height: 1.2; }
-        .svb-admin-shell .svd-logo small { display: block; color: #fff; margin-top: 4px; }
-        .svb-admin-shell .svd-navigation { flex: 1; padding: 20px 10px; }
-        .svb-admin-shell .svd-nav-item { width: 100%; display: flex; align-items: center; gap: 18px; padding: 16px; margin-bottom: 6px; border: 0; border-radius: 6px; color: #fff; background: transparent; text-align: left; cursor: pointer; }
-        .svb-admin-shell .svd-nav-item.active { background: linear-gradient(100deg, #1859bd, #2476e4); color: #fff; }
-        .svb-admin-shell .svd-nav-item:hover { background-color: #28496e; }
-        .svb-admin-shell .svd-logout { display: flex; align-items: center; gap: 20px; width: 100%; margin: 0; padding: 22px 26px; border: 0; border-top: 1px solid #30435c; background: transparent; color: #fff; cursor: pointer; }
-        .svb-admin-shell .svd-logout:disabled { opacity: .6; cursor: wait; }
-        .svb-admin-shell .svd-main-shell { margin-left: 258px; width: calc(100% - 258px); min-width: 0; }
-        .svb-admin-shell .svd-topbar { display: flex; align-items: center; gap: 14px; padding: 16px 24px; min-height: 64px; background: #fff; color: #17233b; border-bottom: 1px solid #d5deea; }
-        .svb-admin-shell .svb-menu-toggle { display: none; }
-        .svb-admin-shell .svb-management { width: 100%; max-width: none; margin: 0; min-height: calc(100dvh - 64px); }
-        .svb-admin-shell .svb-sidebar-close { display: none; }
-        .svb-admin-shell :focus-visible { outline: 3px solid #60a5fa; outline-offset: 2px; }
-        @media (max-width: 900px) {
-          .svb-admin-shell .svd-sidebar { transform: translateX(-100%); transition: transform .2s; }
-          .svb-admin-shell .svd-sidebar.svd-sidebar-open { transform: translateX(0); }
-          .svb-admin-shell .svd-sidebar:not(.svd-sidebar-open) { visibility: hidden; }
-          .svb-admin-shell .svd-main-shell { margin-left: 0; width: 100%; }
-          .svb-admin-shell .svb-menu-toggle { display: inline-flex; padding: 8px; border: 1px solid #cbd5e1; border-radius: 5px; background: #fff; color: #17233b; }
-          .svb-admin-shell .svb-sidebar-close { display: inline-flex; margin: 8px 12px 0 auto; padding: 8px; border: 1px solid #71849d; border-radius: 5px; background: transparent; color: #fff; }
-          .svb-admin-shell .svd-overlay { position: fixed; inset: 0; z-index: 50; background: rgba(15, 23, 42, .5); border: 0; }
-        }
-        @media (prefers-reduced-motion: reduce) { .svb-admin-shell .svd-sidebar { transition: none; } }
-        .svb-admin-shell .svb-management { background: #f6f7fb; color: #131b33; box-sizing: border-box; padding: clamp(16px, 3vw, 42px); }
-        .svb-workspace { max-width: 1440px; margin-inline: auto; }
-        .svb-admin-shell .svb-editor-layout { display: grid; grid-template-columns: minmax(0, 1.12fr) minmax(0, 1fr); gap: 24px; align-items: start; }
-        .svb-admin-shell :is(.svb-form, .svb-preview, .svb-saved-tile) { min-width: 0; padding: clamp(16px, 2vw, 24px); background: #fff; border: 1px solid #e3e1ed; border-radius: 18px; box-shadow: 0 8px 22px #23174309; }
-        .svb-admin-shell .svb-form fieldset { display: grid; gap: 15px; min-width: 0; margin: 0; padding: 0; border: 0; }
-        .svb-admin-shell :is(.svb-form legend, .svb-preview h2, .svb-library h2) { font-size: 1.25rem; line-height: 1.3; margin: 0 0 16px; padding: 0; font-weight: 750; }
-        .svb-admin-shell .svb-radio-group { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 0; }
-        .svb-admin-shell .svb-radio-group label { display: flex; align-items: center; gap: 8px; padding: 10px; border: 1px solid #dfdbe9; border-radius: 10px; cursor: pointer; }
-        .svb-admin-shell .svb-radio-group label:has(input:checked) { background: #f3ecff; border-color: #8852ce; color: #48227b; }
-        .svb-admin-shell .svb-form input { accent-color: #6234a2; }
-        .svb-admin-shell .svb-field { display: grid; gap: 6px; min-width: 0; margin: 0; }
-        .svb-admin-shell .svb-field label { font-size: .875rem; font-weight: 650; }
-        .svb-admin-shell .svb-field :is(input, textarea) { box-sizing: border-box; width: 100%; min-width: 0; min-height: 42px; padding: 9px 10px; border: 1px solid #d9d5e3; border-radius: 9px; background: #fcfbfe; color: #131b33; font: inherit; }
-        .svb-admin-shell .svb-field textarea { resize: vertical; }
-        .svb-admin-shell .svb-field input[type=file] { border-style: dashed; padding: 10px; }
-        .svb-admin-shell .svb-field input::file-selector-button { padding: 7px 10px; margin-inline-end: 8px; border: 0; border-radius: 6px; background: #f0e7fc; color: #48227b; cursor: pointer; }
-        .svb-admin-shell .svb-field-pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-        .svb-admin-shell .svb-form small { color: #55546b; }
-        .svb-admin-shell .svb-primary { justify-self: start; padding: 11px 20px; background: #6234a2; color: white; border: 0; border-radius: 9px; font-weight: 700; cursor: pointer; }
-        .svb-admin-shell .svb-primary:not(:disabled):hover { background: #4e2489; }
-        .svb-admin-shell button:disabled { cursor: default; }
-        .svb-admin-shell .svb-card { overflow: hidden; border-radius: 12px; overflow-wrap: anywhere; }
-        .svb-admin-shell .svb-card-image { display: grid; place-items: center; aspect-ratio: 16 / 9; overflow: hidden; }
-        .svb-admin-shell .svb-card-image img { display: block; width: 100%; height: 100%; object-fit: cover; }
-        .svb-admin-shell .svb-placeholder { display: grid; place-items: center; aspect-ratio: 16 / 9; margin: 0; padding-inline: 12px; background: #ffffff18; text-align: center; }
-        .svb-admin-shell .svb-card-copy { padding: 16px; }
-        .svb-admin-shell .svb-card-copy h3 { margin: 0; }
-        .svb-admin-shell .svb-card-copy p { margin: 6px 0 0; }
-        .svb-library { margin-top: 30px; }
-        .svb-admin-shell .svb-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 16px; }
-        .svb-admin-shell .svb-saved-tile { display: flex; flex-direction: column; justify-content: space-between; gap: 10px; padding: 12px; }
-        .svb-admin-shell .svb-card-actions { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; color: #55546b; font-size: .82rem; }
-        .svb-admin-shell :is(.svb-card-actions, .svb-pagination) button { padding: 7px 10px; border: 1px solid #ded7eb; border-radius: 8px; background: #faf7ff; color: #48227b; font: inherit; }
-        .svb-admin-shell .svb-pagination { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px; margin-top: 16px; }
-        .svb-admin-shell .svb-list-status { padding: 24px; border: 1px dashed #d9d5e3; border-radius: 14px; background: #fff; }
-        @media (max-width: 1100px) and (min-width: 901px), (max-width: 720px) {
-          .svb-admin-shell .svb-editor-layout { grid-template-columns: minmax(0, 1fr); }
-        }
-        @media (max-width: 420px) {
-          .svb-admin-shell .svb-field-pair { grid-template-columns: minmax(0, 1fr); }
-        }
-      `}</style>
       {sidebarOpen && <button type="button" className="svd-overlay" aria-label="Close sidebar" onClick={() => setSidebarOpen(false)} />}
       <aside id="svb-admin-sidebar" aria-label="Admin sidebar" className={`svd-sidebar ${sidebarOpen ? 'svd-sidebar-open' : ''}`}>
         <button type="button" className="svb-sidebar-close" aria-label="Close menu" onClick={() => setSidebarOpen(false)}><X size={20} /></button>
@@ -239,13 +167,13 @@ export default function BannerManagement() {
           <strong>Banner Management</strong>
         </header>
         <main className="svb-management">
-          <div className="svb-workspace">
+          <div className="svb-workspace"><div className="svb-page-heading"><div><span className="svb-kicker">CONTENT STUDIO</span><h1>Banner Management</h1><p>Create beautiful announcements and manage your website banners in one place.</p></div><span className="svb-heading-mark">✦</span></div>
 
     {message && <p className="svb-success" role="status">{message}</p>}
     <div className="svb-editor-layout">
       <form className="svb-form" onSubmit={submit}>
         <fieldset disabled={saving}>
-          <legend>Create banner</legend>
+          <legend>Create a banner</legend><p className="svb-form-intro">Choose a format, personalize the design, and preview before publishing.</p>
           <div className="svb-radio-group">
             <label><input type="radio" name="bannerType" value="IMAGE" checked={form.bannerType === 'IMAGE'} onChange={() => chooseType('IMAGE')} /> Upload Image</label>
             <label><input type="radio" name="bannerType" value="TEXT" checked={form.bannerType === 'TEXT'} onChange={() => chooseType('TEXT')} /> Write Text</label>
@@ -273,7 +201,7 @@ export default function BannerManagement() {
         </fieldset>
       </form>
       <aside className="svb-preview" aria-label="Banner preview">
-        <h2>Live preview</h2>
+        <h2>Live preview <span className="svb-live-dot">● LIVE</span></h2><p className="svb-preview-note">Your banner updates as you edit its details.</p>
         <article className="svb-card" style={{ backgroundColor: form.backgroundColor, color: form.textColor }}>
           {form.bannerType === 'IMAGE' && (preview ? <div className="svb-card-image"><img src={preview} alt={form.altText || 'Selected banner'} /></div> : <p className="svb-placeholder">Choose an image to preview</p>)}
           <div className="svb-card-copy"><h3>{form.title || 'Your banner title'}</h3><p>{form.subtitle || 'Your announcement appears here.'}</p></div>
@@ -281,7 +209,7 @@ export default function BannerManagement() {
       </aside>
     </div>
     <section className="svb-library" aria-labelledby="svb-saved-heading">
-    <h2 id="svb-saved-heading">Saved banners</h2>
+    <div className="svb-library-heading"><div><span className="svb-kicker">YOUR COLLECTION</span><h2 id="svb-saved-heading">Saved banners</h2></div></div>
     {loading ? <p className="svb-list-status" role="status">Loading banners...</p> : listError ? <p className="svb-error" role="alert">{listError}</p> : <>
       {!result.items.length && <p className="svb-list-status">No banners yet. Create your first banner above.</p>}
       <div className="svb-grid">{result.items.map(banner => <div className="svb-saved-tile" key={banner.id}>

@@ -6,6 +6,7 @@ import ShreeVaniHeader from "../pages/ShreeVaniHeader";
 
 import "../css/ShreeVani.css";
 import "../css/ShreeVaniAdmin.css";
+import "../css/ShreeVaniAdminLogin.css";
 
 import api from "../utils/axiosConfig";
 
@@ -151,7 +152,18 @@ const ShreeVaniAdminLogin = () => {
     <div className="sv-page">
       <ShreeVaniHeader />
 
-      <main className="sv-admin-login-page">
+      <main className="sv-admin-login-page sv-login-redesign">
+        <div className="sv-login-layout">
+          <aside className="sv-login-story" aria-label="Welcome to Shree Vani Jagat">
+            <div className="sv-login-story-top"><span className="sv-login-emblem">✺</span><span>SHREE VANI JAGAT</span></div>
+            <div className="sv-login-story-body">
+              <span className="sv-login-kicker">YOUR COMMUNITY · YOUR SPACE</span>
+              <h2>Preserving traditions.<br/><em>Connecting hearts.</em></h2>
+              <p>Welcome to your administration workspace. Manage your content, community and celebrations with confidence.</p>
+              <div className="sv-login-story-pills"><span>✦ Secure access</span><span>✦ Seamless management</span></div>
+            </div>
+            <div className="sv-login-story-footer">TRADITION <span>✧</span> FAMILY <span>✧</span> COMMUNITY</div>
+          </aside>
         <div className="sv-admin-login-card">
 
           {/* Logo */}
@@ -165,10 +177,11 @@ const ShreeVaniAdminLogin = () => {
           </div>
 
           {/* Title */}
-          <h1>Admin Login</h1>
+          <div className="sv-login-welcome">WELCOME BACK</div>
+          <h1>Admin Login<span className="sv-login-dot">.</span></h1>
 
           <p className="sv-admin-login-subtitle">
-            Sign in to manage your website.
+            Sign in to your Shree Vani Jagat dashboard.
           </p>
 
           {/* Login Form */}
@@ -261,6 +274,7 @@ const ShreeVaniAdminLogin = () => {
             ← Back to Home
           </Link>
 
+        </div>
         </div>
       </main>
     </div>
