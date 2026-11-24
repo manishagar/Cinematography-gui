@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Image, Folder, FileText, Users, ChartNoAxesColumn, Settings, LogOut, Menu, Search, ChevronLeft, ChevronRight, Plus, Home, File, ArrowUp, ArrowDown, X, Upload, Trash2 } from 'lucide-react';
+import { LayoutDashboard, Image, Folder, FileText, Users, ChartNoAxesColumn, Settings, LogOut, Menu, Search, ChevronLeft, ChevronRight, ChevronDown, Plus, Home, File, ArrowUp, ArrowDown, X, Upload, Trash2 } from 'lucide-react';
 import '../css/ShreeVaniAdminDashboard.css';
 import api from '../utils/axiosConfig';
 
@@ -9,15 +9,26 @@ const menuItems = [
   { label: 'Banner Management', icon: Image, path: '/shree-vani/admin/banner' },
   { label: 'Folder Management', icon: Folder, path: '/shree-vani/admin/folders' },
   { label: 'File Management', icon: FileText, path: '/shree-vani/admin/files' },
-  { label: 'User Management', icon: Users, path: '/shree-vani/admin/users' },
   { label: 'Reports', icon: ChartNoAxesColumn, path: '/shree-vani/admin/reports' },
-  { label: 'Settings', icon: Settings, path: '/shree-vani/admin/settings' },
+  {
+    label: 'Settings',
+    icon: Settings,
+    children: [
+      {
+        label: 'User Settings',
+        path: '/shree-vani/admin/settings/profile'
+      },
+      {
+        label: 'Change Password',
+        path: '/shree-vani/admin/settings/change-password'
+      }
+    ]
+  }
 ];
 const stats = [
   { label: 'Total Files', count: '560', change: '+12%', icon: File, color: 'blue' },
   { label: 'Total Folders', count: '42', change: '+8%', icon: Folder, color: 'green' },
   { label: 'Active Banners', count: '5', change: '+25%', icon: Image, color: 'purple' },
-  { label: 'Total Users', count: '15', change: '+0%', icon: Users, color: 'orange' },
 ];
 const initialActivities = [
   { id: 1, icon: FileText, color: 'blue', message: 'Shikha Sharma uploaded Contract.pdf', time: '2 hours ago' },
@@ -79,6 +90,7 @@ export default function ShreeVaniAdminDashboard() {
   const userName = 'Admin'; // Replace with authenticated user profile from backend.
   const [loggingOut, setLoggingOut] = useState(false);
   const logoutInProgress = useRef(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   const logout = async () => {
     if (logoutInProgress.current) return;
@@ -142,7 +154,51 @@ export default function ShreeVaniAdminDashboard() {
           </div>
         </div>
         <nav className="svd-navigation" aria-label="Admin navigation">
-          {menuItems.map(item => <button key={item.label} className={`svd-nav-item ${item.label === 'Dashboard' ? 'active' : ''}`} onClick={() => { setSidebarOpen(false); if (item.label !== 'Dashboard') navigate(item.path); }}><item.icon size={23} fill={item.label === 'Folder Management' ? 'currentColor' : 'none'} /><span>{item.label}</span></button>)}
+
+          {menuItems.map((item) => (
+            <React.Fragment key={item.label}>
+              <button
+                type="button"
+                className="svd-nav-item"
+                aria-expanded={item.children ? settingsOpen : undefined}
+                onClick={() => {
+                  if (item.children) {
+                    setSettingsOpen(prev => !prev);
+                  } else {
+                    setSidebarOpen(false);
+                    navigate(item.path);
+                  }
+                }}
+              >
+                <item.icon size={23} />
+                <span>{item.label}</span>
+                {item.children && (
+                  settingsOpen
+                    ? <ChevronDown size={18} />
+                    : <ChevronRight size={18} />
+                )}
+              </button>
+
+              {item.children && settingsOpen && (
+                <div className="svd-submenu">
+                  {item.children.map(child => (
+                    <button
+                      key={child.path}
+                      type="button"
+                      className="svd-submenu-item"
+                      onClick={() => {
+                        setSidebarOpen(false);
+                        navigate(child.path);
+                      }}
+                    >
+                      {child.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </React.Fragment>
+          ))}
+
         </nav>
         <button type="button" className="svd-logout" onClick={logout} disabled={loggingOut} aria-busy={loggingOut}><LogOut size={23} />{loggingOut ? 'Logging out...' : 'Logout'}</button>
       </aside>

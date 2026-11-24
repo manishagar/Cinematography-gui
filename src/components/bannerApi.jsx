@@ -5,32 +5,163 @@ function headers() {
   if (!token) throw new Error('Please sign in as admin.');
   return { Authorization: `Bearer ${token}` };
 }
-export function apiError(error) {
-  const data = error.response?.data;
-  if (Array.isArray(data?.messages) && data.messages.length) return data.messages.join(', ');
-  if (error.response?.status === 401) return 'Your session expired. Please sign in again.';
-  if (error.response?.status === 403) return 'Admin access is required.';
-  if (error.response?.status === 413) return 'Maximum image size is 10 MB.';
-  return data?.message || error.message || 'Unable to process the banner request.';
+const GENERIC_ERROR = /^API executed with errors!?$/i;
+
+function getResponseData(error) {
+  let data =
+    error?.response?.data ??
+    error?.data ??
+    error;
+
+  if (typeof data === 'string') {
+    try {
+      data = JSON.parse(data);
+    } catch {
+      data = { message: data };
+    }
+  }
+
+  return data;
 }
+
+function extractMessages(data) {
+  const raw = [
+    ...(Array.isArray(data?.messages)
+      ? data.messages
+      : data?.messages ? [data.messages] : []),
+
+    ...(Array.isArray(data?.errors)
+      ? data.errors
+      : data?.errors ? [data.errors] : []),
+
+    ...(data?.message ? [data.message] : [])
+  ];
+
+  return raw
+    .map(item =>
+      typeof item === 'string'
+        ? item
+        : item?.defaultMessage || item?.message || ''
+    )
+    .flatMap(message => message.split('\n'))
+    .map(message => message.trim())
+    .filter(message =>
+      message && !GENERIC_ERROR.test(message)
+    );
+}
+
+function responseMessage(data) {
+  return extractMessages(data)
+    .map(message =>
+      message.replace(
+        /^[a-zA-Z][\w.]*\s*:\s*/,
+        ''
+      ).trim()
+    )
+    .join('\n');
+}
+
+export function getFieldErrors(error) {
+  const data = getResponseData(error);
+  const fields = {};
+
+  const knownFields = [
+    'title',
+    'subtitle',
+    'altText',
+    'image',
+    'backgroundColor',
+    'textColor',
+    'startsAt',
+    'endsAt',
+    'bannerType',
+    'active'
+  ];
+
+  const messages = extractMessages(data);
+
+  messages.forEach(message => {
+    const match = message.match(
+      /^([a-zA-Z][\w.]*)\s*:\s*(.+)$/
+    );
+
+    if (match) {
+      const field = match[1].split('.').pop();
+      const text = match[2].trim();
+
+      if (knownFields.includes(field)) {
+        fields[field] = fields[field]
+          ? `${fields[field]}\n${text}`
+          : text;
+      }
+    }
+  });
+
+  return fields;
+}
+
+export function apiError(error) {
+  const data = getResponseData(error);
+  const status = error?.response?.status;
+
+  if (status === 401) {
+    return 'Your session expired. Please sign in again.';
+  }
+
+  if (status === 403) {
+    return 'Admin access is required.';
+  }
+
+  if (status === 413) {
+    return 'Maximum image size is 10 MB.';
+  }
+
+  return (
+    responseMessage(data) ||
+    error?.message ||
+    'Unable to process the banner request.'
+  );
+}
+
+function validateResponse(data) {
+  if (
+    String(data?.status || '').toUpperCase() !== 'SUCCESS'
+  ) {
+    const error = new Error(
+      responseMessage(data) || 'Unable to save banner.'
+    );
+
+    error.data = data;
+    throw error;
+  }
+}
+
 export async function createBanner(details, file) {
+  if (details.bannerType === 'TEXT') {
+    const { data } = await api.post('/admin/users/admin/banner/add', details, {
+      headers: { ...headers(), 'Content-Type': 'application/json' },
+    });
+    validateResponse(data);
+    return data.data;
+  }
+
   const form = new FormData();
   form.append('details', new Blob([JSON.stringify(details)], { type: 'application/json' }));
   if (details.bannerType === 'IMAGE' && file) form.append('image', file);
   const { data } = await api.post('/admin/users/admin/banners', form, { headers: headers() });
-  if (data.status !== 'SUCCESS') throw new Error(data.messages?.join(', ') || 'Unable to save banner.');
+  validateResponse(data);
   return data.data;
 }
 export async function listBanners(page = 0, admin = false, signal) {
   const { data } = await api.get(admin ? '/admin/users/admin/banners' : '/api/public/banners', {
     params: { page, size: 12 }, signal, ...(admin ? { headers: headers() } : {}),
   });
-  if (data.status !== 'SUCCESS') throw new Error(data.messages?.join(', ') || 'Unable to load banners.');
+  if (data.status !== 'SUCCESS') throw new Error(responseMessage(data) || 'Unable to load banners.');
   return data.data;
 }
 export async function deactivateBanner(id) {
   const { data } = await api.delete(`/admin/users/admin/banners/${id}`, { headers: headers() });
-  if (data.status !== 'SUCCESS') throw new Error(data.messages?.join(', ') || 'Unable to deactivate banner.');
+  if (data.status !== 'SUCCESS') throw new Error(responseMessage(data) || 'Unable to deactivate banner.');
 }
 export async function fetchBannerImage(path, admin = false, signal) {
   const { data } = await api.get(path, {

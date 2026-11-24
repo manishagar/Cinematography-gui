@@ -4,7 +4,7 @@ import { LayoutDashboard, Image, Folder, FileText, Users, ChartNoAxesColumn, Set
 import api from '../utils/axiosConfig';
 import '../css/ShreeVaniAdminDashboard.css';
 import BannerCard from '../components/BannerCard';
-import { apiError, createBanner, deactivateBanner, listBanners } from '../components/bannerApi';
+import { apiError, getFieldErrors, createBanner, deactivateBanner, listBanners } from '../components/bannerApi';
 import '../css/Banners.css';
 
 const menuItems = [
@@ -66,6 +66,7 @@ export default function BannerManagement() {
   const [saving, setSaving] = useState(false);
   const savingRef = useRef(false);
   const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({});
   const [message, setMessage] = useState('');
   const [result, setResult] = useState({ items: [], totalPages: 0 });
   const [page, setPage] = useState(0);
@@ -93,14 +94,16 @@ export default function BannerManagement() {
   function change(event) {
     const { name, value, type, checked } = event.target;
     setForm(previous => ({ ...previous, [name]: type === 'checkbox' ? checked : value }));
+    setFieldErrors(previous => { const next = { ...previous }; delete next[name]; return next; });
   }
   function chooseType(type) {
     setForm(previous => ({ ...previous, bannerType: type }));
-    setFile(null); setError('');
+    setFile(null); setError(''); setFieldErrors({});
     if (fileInput.current) fileInput.current.value = '';
   }
   function chooseFile(event) {
     setError('');
+    setFieldErrors(previous => { const next = { ...previous }; delete next.image; return next; });
     const selected = event.target.files?.[0];
     if (!selected) { setFile(null); return; }
     if (!['image/png', 'image/jpeg'].includes(selected.type) || selected.size === 0 || selected.size > 10 * 1024 * 1024) {
@@ -112,21 +115,57 @@ export default function BannerManagement() {
   async function submit(event) {
     event.preventDefault();
     if (savingRef.current) return;
-    setError(''); setMessage('');
-    if (!form.title.trim()) { setError('Enter a title.'); return; }
-    if (form.bannerType === 'IMAGE' && !file) { setError('Choose a banner image.'); return; }
-    const startsAt = form.startsAt ? new Date(form.startsAt).toISOString() : null;
-    const endsAt = form.endsAt ? new Date(form.endsAt).toISOString() : null;
-    if (startsAt && endsAt && new Date(endsAt) <= new Date(startsAt)) { setError('End date must be after start date.'); return; }
-    savingRef.current = true; setSaving(true);
+
+    setError('');
+    setMessage('');
+    setFieldErrors({});
+    savingRef.current = true;
+    setSaving(true);
+
     try {
-      await createBanner({ ...form, title: form.title.trim(), startsAt, endsAt }, file);
-      setMessage('Banner saved successfully.'); setForm(initial); setFile(null);
+      const formatDate = value => {
+        if (!value) return null;
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) throw new Error('Invalid date format.');
+        return date.toISOString();
+      };
+
+      const startsAt = formatDate(form.startsAt);
+      const endsAt = formatDate(form.endsAt);
+      // Backend performs required-field validation; do not block the request here.
+      const requestData = {
+        ...form,
+        title: form.title.trim(),
+        startsAt,
+        endsAt,
+      };
+      await createBanner(requestData, file);
+      setMessage('Banner saved successfully.');
+      setForm(initial);
+      setFile(null);
       if (fileInput.current) fileInput.current.value = '';
-      setPage(0); setReload(value => value + 1);
-    } catch (err) { setError(apiError(err)); }
-    finally { savingRef.current = false; setSaving(false); }
+      setPage(0);
+      setReload(value => value + 1);
+    } catch (err) {
+      console.error('Backend validation error:', err);
+
+      const fields = getFieldErrors(err);
+
+      console.log('Parsed field errors:', fields);
+
+      if (Object.keys(fields).length > 0) {
+        setFieldErrors(fields);
+        setError('');
+      } else {
+        setFieldErrors({});
+        setError(apiError(err));
+      }
+    } finally {
+      savingRef.current = false;
+      setSaving(false);
+    }
   }
+
   async function deactivate(id) {
     if (deactivating !== null) return;
     setDeactivating(id); setMessage(''); setListError('');
@@ -137,96 +176,123 @@ export default function BannerManagement() {
     finally { setDeactivating(null); }
   }
   return <div className="svd-app svb-admin-shell">
-      {sidebarOpen && <button type="button" className="svd-overlay" aria-label="Close sidebar" onClick={() => setSidebarOpen(false)} />}
-      <aside id="svb-admin-sidebar" aria-label="Admin sidebar" className={`svd-sidebar ${sidebarOpen ? 'svd-sidebar-open' : ''}`}>
-        <button type="button" className="svb-sidebar-close" aria-label="Close menu" onClick={() => setSidebarOpen(false)}><X size={20} /></button>
-        <div className="svd-logo">
-          <img
-            src="/images/Logo.png"
-            alt="Shree Vani logo"
-            style={{
-              width: 48,
-              height: 48,
-              objectFit: 'contain',
-              flexShrink: 0,
-            }}
-          />
-          <div>
-            <strong>Shree Vani</strong>
-            <small>Admin Portal</small>
-          </div>
+    {sidebarOpen && <button type="button" className="svd-overlay" aria-label="Close sidebar" onClick={() => setSidebarOpen(false)} />}
+    <aside id="svb-admin-sidebar" aria-label="Admin sidebar" className={`svd-sidebar ${sidebarOpen ? 'svd-sidebar-open' : ''}`}>
+      <button type="button" className="svb-sidebar-close" aria-label="Close menu" onClick={() => setSidebarOpen(false)}><X size={20} /></button>
+      <div className="svd-logo">
+        <img
+          src="/images/Logo.png"
+          alt="Shree Vani logo"
+          style={{
+            width: 48,
+            height: 48,
+            objectFit: 'contain',
+            flexShrink: 0,
+          }}
+        />
+        <div>
+          <strong>Shree Vani</strong>
+          <small>Admin Portal</small>
         </div>
-        <nav className="svd-navigation" aria-label="Admin navigation">
-          {menuItems.map(item => <button type="button" aria-current={item.label === 'Banner Management' ? 'page' : undefined} key={item.label} className={`svd-nav-item ${item.label === 'Banner Management' ? 'active' : ''}`} onClick={() => { setSidebarOpen(false); navigate(item.path); }}><item.icon size={23} fill={item.label === 'Folder Management' ? 'currentColor' : 'none'} /><span>{item.label}</span></button>)}
-        </nav>
-        <button type="button" className="svd-logout" onClick={logout} disabled={loggingOut} aria-busy={loggingOut}><LogOut size={23} />{loggingOut ? 'Logging out...' : 'Logout'}</button>
-      </aside>
-      <div className="svd-main-shell">
-        <header className="svd-topbar">
-          <button type="button" className="svb-menu-toggle" aria-label="Toggle admin menu" aria-controls="svb-admin-sidebar" aria-expanded={sidebarOpen} onClick={() => setSidebarOpen(value => !value)}><Menu size={24} /></button>
-          <strong>Banner Management</strong>
-        </header>
-        <main className="svb-management">
-          <div className="svb-workspace"><div className="svb-page-heading"><div><span className="svb-kicker">CONTENT STUDIO</span><h1>Banner Management</h1><p>Create beautiful announcements and manage your website banners in one place.</p></div><span className="svb-heading-mark">✦</span></div>
-
-    {message && <p className="svb-success" role="status">{message}</p>}
-    <div className="svb-editor-layout">
-      <form className="svb-form" onSubmit={submit}>
-        <fieldset disabled={saving}>
-          <legend>Create a banner</legend><p className="svb-form-intro">Choose a format, personalize the design, and preview before publishing.</p>
-          <div className="svb-radio-group">
-            <label><input type="radio" name="bannerType" value="IMAGE" checked={form.bannerType === 'IMAGE'} onChange={() => chooseType('IMAGE')} /> Upload Image</label>
-            <label><input type="radio" name="bannerType" value="TEXT" checked={form.bannerType === 'TEXT'} onChange={() => chooseType('TEXT')} /> Write Text</label>
-          </div>
-          {form.bannerType === 'IMAGE' && <div className="svb-field">
-            <label htmlFor="svb-image">Banner image</label>
-            <input ref={fileInput} id="svb-image" type="file" accept="image/png,image/jpeg" onChange={chooseFile} required />
-            <small>PNG or JPEG, maximum 10 MB. Suggested shape: 16:9.</small>
-          </div>}
-          <div className="svb-field"><label htmlFor="svb-title">Title</label><input id="svb-title" name="title" value={form.title} onChange={change} maxLength={200} required placeholder="Welcome to Shree Vani" /></div>
-          <div className="svb-field"><label htmlFor="svb-subtitle">Description</label><textarea id="svb-subtitle" name="subtitle" value={form.subtitle} onChange={change} maxLength={1000} rows={4} placeholder="Write your announcement here..." /></div>
-          {form.bannerType === 'IMAGE' && <div className="svb-field"><label htmlFor="svb-alt">Image description for accessibility</label><input id="svb-alt" name="altText" value={form.altText} onChange={change} maxLength={250} placeholder="Describe the banner image" /></div>}
-          <div className="svb-field-pair">
-            <div className="svb-field"><label htmlFor="svb-bg">Background colour</label><input id="svb-bg" name="backgroundColor" type="color" value={form.backgroundColor} onChange={change} /></div>
-            <div className="svb-field"><label htmlFor="svb-fg">Text colour</label><input id="svb-fg" name="textColor" type="color" value={form.textColor} onChange={change} /></div>
-          </div>
-          <div className="svb-field-pair">
-            <div className="svb-field"><label htmlFor="svb-start">Start date (optional)</label><input id="svb-start" type="datetime-local" name="startsAt" value={form.startsAt} onChange={change} /></div>
-            <div className="svb-field"><label htmlFor="svb-end">End date (optional)</label><input id="svb-end" type="datetime-local" name="endsAt" value={form.endsAt} onChange={change} /></div>
-          </div>
-          <small>Dates use your browser’s local time zone and are sent to the server as UTC.</small>
-          <label className="svb-checkbox"><input type="checkbox" name="active" checked={form.active} onChange={change} /> Active</label>
-          {error && <p role="alert" className="svb-error">{error}</p>}
-          <button className="svb-primary" type="submit">{saving ? 'Saving...' : 'Save Banner'}</button>
-        </fieldset>
-      </form>
-      <aside className="svb-preview" aria-label="Banner preview">
-        <h2>Live preview <span className="svb-live-dot">● LIVE</span></h2><p className="svb-preview-note">Your banner updates as you edit its details.</p>
-        <article className="svb-card" style={{ backgroundColor: form.backgroundColor, color: form.textColor }}>
-          {form.bannerType === 'IMAGE' && (preview ? <div className="svb-card-image"><img src={preview} alt={form.altText || 'Selected banner'} /></div> : <p className="svb-placeholder">Choose an image to preview</p>)}
-          <div className="svb-card-copy"><h3>{form.title || 'Your banner title'}</h3><p>{form.subtitle || 'Your announcement appears here.'}</p></div>
-        </article>
-      </aside>
-    </div>
-    <section className="svb-library" aria-labelledby="svb-saved-heading">
-    <div className="svb-library-heading"><div><span className="svb-kicker">YOUR COLLECTION</span><h2 id="svb-saved-heading">Saved banners</h2></div></div>
-    {loading ? <p className="svb-list-status" role="status">Loading banners...</p> : listError ? <p className="svb-error" role="alert">{listError}</p> : <>
-      {!result.items.length && <p className="svb-list-status">No banners yet. Create your first banner above.</p>}
-      <div className="svb-grid">{result.items.map(banner => <div className="svb-saved-tile" key={banner.id}>
-        <BannerCard banner={banner} admin />
-        <div className="svb-card-actions"><span>{banner.bannerType} · {banner.active ? 'Enabled (subject to schedule)' : 'Inactive'}</span>
-          {banner.active && <button disabled={deactivating !== null} onClick={() => deactivate(banner.id)}>{deactivating === banner.id ? 'Deactivating...' : 'Deactivate'}</button>}
-        </div>
-      </div>)}</div>
-      {result.totalPages > 1 && <nav className="svb-pagination" aria-label="Admin banner pages">
-        <button disabled={page === 0} onClick={() => setPage(p => p - 1)}>Previous</button>
-        <span>Page {page + 1} of {result.totalPages}</span>
-        <button disabled={page + 1 >= result.totalPages} onClick={() => setPage(p => p + 1)}>Next</button>
-      </nav>}
-    </>}
-    </section>
-          </div>
-        </main>
       </div>
-    </div>;
+      <nav className="svd-navigation" aria-label="Admin navigation">
+        {menuItems.map(item => <button type="button" aria-current={item.label === 'Banner Management' ? 'page' : undefined} key={item.label} className={`svd-nav-item ${item.label === 'Banner Management' ? 'active' : ''}`} onClick={() => { setSidebarOpen(false); navigate(item.path); }}><item.icon size={23} fill={item.label === 'Folder Management' ? 'currentColor' : 'none'} /><span>{item.label}</span></button>)}
+      </nav>
+      <button type="button" className="svd-logout" onClick={logout} disabled={loggingOut} aria-busy={loggingOut}><LogOut size={23} />{loggingOut ? 'Logging out...' : 'Logout'}</button>
+    </aside>
+    <div className="svd-main-shell">
+      <header className="svd-topbar">
+        <button type="button" className="svb-menu-toggle" aria-label="Toggle admin menu" aria-controls="svb-admin-sidebar" aria-expanded={sidebarOpen} onClick={() => setSidebarOpen(value => !value)}><Menu size={24} /></button>
+        <strong>Banner Management</strong>
+      </header>
+      <main className="svb-management">
+        <div className="svb-workspace"><div className="svb-page-heading"><div><span className="svb-kicker">CONTENT STUDIO</span><h1>Banner Management</h1><p>Create beautiful announcements and manage your website banners in one place.</p></div><span className="svb-heading-mark">✦</span></div>
+
+          {message && <p className="svb-success" role="status">{message}</p>}
+          <div className="svb-editor-layout">
+            <form className="svb-form" onSubmit={submit} noValidate>
+              <fieldset disabled={saving}>
+                <legend>Create a banner</legend><p className="svb-form-intro">Choose a format, personalize the design, and preview before publishing.</p>
+                <div className="svb-radio-group">
+                  <label><input type="radio" name="bannerType" value="IMAGE" checked={form.bannerType === 'IMAGE'} onChange={() => chooseType('IMAGE')} /> Upload Image</label>
+                  <label><input type="radio" name="bannerType" value="TEXT" checked={form.bannerType === 'TEXT'} onChange={() => chooseType('TEXT')} /> Write Text</label>
+                </div>
+                {form.bannerType === 'IMAGE' && <div className="svb-field">
+                  <label htmlFor="svb-image">Banner image</label>
+                  <input ref={fileInput} id="svb-image" type="file" accept="image/png,image/jpeg" onChange={chooseFile} />
+                  <small>PNG or JPEG, maximum 10 MB. Suggested shape: 16:9.</small>{fieldErrors.image && <small className="svb-field-error" role="alert">{fieldErrors.image}</small>}
+                </div>}
+
+                <div className="svb-field">
+                  <label htmlFor="svb-title">Title</label>
+
+                  <input
+                    id="svb-title"
+                    name="title"
+                    type="text"
+                    value={form.title}
+                    onChange={change}
+                    maxLength={200}
+                    aria-invalid={Boolean(fieldErrors.title)}
+                    className={
+                      fieldErrors.title ? 'svb-input-error' : ''
+                    }
+                    placeholder="Welcome to Shree Vani"
+                  />
+
+                  {fieldErrors.title && (
+                    <small
+                      className="svb-field-error"
+                      role="alert"
+                    >
+                      {fieldErrors.title}
+                    </small>
+                  )}
+                </div>
+
+                <div className="svb-field"><label htmlFor="svb-subtitle">Description</label><textarea id="svb-subtitle" name="subtitle" value={form.subtitle} onChange={change} maxLength={1000} rows={4} aria-invalid={Boolean(fieldErrors.subtitle)} className={fieldErrors.subtitle ? "svb-input-error" : ""} placeholder="Write your announcement here..." />{fieldErrors.subtitle && <small className="svb-field-error" role="alert">{fieldErrors.subtitle}</small>}</div>
+                {form.bannerType === 'IMAGE' && <div className="svb-field"><label htmlFor="svb-alt">Image description for accessibility</label><input id="svb-alt" name="altText" value={form.altText} onChange={change} maxLength={250} aria-invalid={Boolean(fieldErrors.altText)} className={fieldErrors.altText ? "svb-input-error" : ""} placeholder="Describe the banner image" />{fieldErrors.altText && <small className="svb-field-error" role="alert">{fieldErrors.altText}</small>}</div>}
+                <div className="svb-field-pair">
+                  <div className="svb-field"><label htmlFor="svb-bg">Background colour</label><input id="svb-bg" name="backgroundColor" type="color" value={form.backgroundColor} onChange={change} />{fieldErrors.backgroundColor && <small className="svb-field-error" role="alert">{fieldErrors.backgroundColor}</small>}</div>
+                  <div className="svb-field"><label htmlFor="svb-fg">Text colour</label><input id="svb-fg" name="textColor" type="color" value={form.textColor} onChange={change} />{fieldErrors.textColor && <small className="svb-field-error" role="alert">{fieldErrors.textColor}</small>}</div>
+                </div>
+                <div className="svb-field-pair">
+                  <div className="svb-field"><label htmlFor="svb-start">Start date (optional)</label><input id="svb-start" type="datetime-local" name="startsAt" value={form.startsAt} onChange={change} />{fieldErrors.startsAt && <small className="svb-field-error" role="alert">{fieldErrors.startsAt}</small>}</div>
+                  <div className="svb-field"><label htmlFor="svb-end">End date (optional)</label><input id="svb-end" type="datetime-local" name="endsAt" value={form.endsAt} onChange={change} />{fieldErrors.endsAt && <small className="svb-field-error" role="alert">{fieldErrors.endsAt}</small>}</div>
+                </div>
+                <small>Dates use your browser’s local time zone and are sent to the server as UTC.</small>
+                <label className="svb-checkbox"><input type="checkbox" name="active" checked={form.active} onChange={change} /> Active</label>
+                {error && <p role="alert" className="svb-error" style={{ whiteSpace: 'pre-line' }}>{error}</p>}
+                <button className="svb-primary" type="submit">{saving ? 'Saving...' : 'Save Banner'}</button>
+              </fieldset>
+            </form>
+            <aside className="svb-preview" aria-label="Banner preview">
+              <h2>Live preview <span className="svb-live-dot">● LIVE</span></h2><p className="svb-preview-note">Your banner updates as you edit its details.</p>
+              <article className="svb-card" style={{ backgroundColor: form.backgroundColor, color: form.textColor }}>
+                {form.bannerType === 'IMAGE' && (preview ? <div className="svb-card-image"><img src={preview} alt={form.altText || 'Selected banner'} /></div> : <p className="svb-placeholder">Choose an image to preview</p>)}
+                <div className="svb-card-copy"><h3>{form.title || 'Your banner title'}</h3><p>{form.subtitle || 'Your announcement appears here.'}</p></div>
+              </article>
+            </aside>
+          </div>
+          <section className="svb-library" aria-labelledby="svb-saved-heading">
+            <div className="svb-library-heading"><div><span className="svb-kicker">YOUR COLLECTION</span><h2 id="svb-saved-heading">Saved banners</h2></div></div>
+            {loading ? <p className="svb-list-status" role="status">Loading banners...</p> : listError ? <p className="svb-error" role="alert">{listError}</p> : <>
+              {!result.items.length && <p className="svb-list-status">No banners yet. Create your first banner above.</p>}
+              <div className="svb-grid">{result.items.map(banner => <div className="svb-saved-tile" key={banner.id}>
+                <BannerCard banner={banner} admin />
+                <div className="svb-card-actions"><span>{banner.bannerType} · {banner.active ? 'Enabled (subject to schedule)' : 'Inactive'}</span>
+                  {banner.active && <button disabled={deactivating !== null} onClick={() => deactivate(banner.id)}>{deactivating === banner.id ? 'Deactivating...' : 'Deactivate'}</button>}
+                </div>
+              </div>)}</div>
+              {result.totalPages > 1 && <nav className="svb-pagination" aria-label="Admin banner pages">
+                <button disabled={page === 0} onClick={() => setPage(p => p - 1)}>Previous</button>
+                <span>Page {page + 1} of {result.totalPages}</span>
+                <button disabled={page + 1 >= result.totalPages} onClick={() => setPage(p => p + 1)}>Next</button>
+              </nav>}
+            </>}
+          </section>
+        </div>
+      </main>
+    </div>
+  </div>;
 }

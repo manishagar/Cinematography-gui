@@ -9,6 +9,7 @@ import ShreeVaniContact from "./pages/ShreeVaniContact";
 import ShreeVaniAdminLogin from "./components/ShreeVaniAdminLogin.jsx";
 import ShreeVaniAdminDashboard from "./pages/ShreeVaniAdminDashboard";
 import BannerManagement from './pages/BannerManagement'
+import ChangePassword from './components/ChangePassword.jsx'
 
 export default function App() {
   return (
@@ -27,6 +28,7 @@ export default function App() {
           element={<ShreeVaniAdminDashboard />}
         />
         <Route path="/shree-vani/admin/banner" element={<BannerManagement />} />
+        <Route path = "/shree-vani/admin/settings/change-password" element={<ChangePassword/>}/>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
