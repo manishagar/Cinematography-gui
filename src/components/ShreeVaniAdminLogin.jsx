@@ -1,12 +1,13 @@
 
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 
 import ShreeVaniHeader from "../pages/ShreeVaniHeader";
 
 import "../css/ShreeVani.css";
 import "../css/ShreeVaniAdmin.css";
 import "../css/ShreeVaniAdminLogin.css";
+import "../css/PasswordExpiry.css";
 
 import api from "../utils/axiosConfig";
 
@@ -25,6 +26,8 @@ const encodeBase64 = (value) => {
 
 const ShreeVaniAdminLogin = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const [successMessage, setSuccessMessage] = useState(location.state?.successMessage || "");
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -37,6 +40,7 @@ const ShreeVaniAdminLogin = () => {
   const handleLogin = async (event) => {
     event.preventDefault();
 
+    setSuccessMessage("");
     setError("");
     setPasswordExpired(false);
 
@@ -120,33 +124,7 @@ const ShreeVaniAdminLogin = () => {
 
       const messages = responseData?.messages;
 
-      const passwordExpiryMessage =
-        Array.isArray(messages) &&
-        messages.some((message) =>
-          String(message)
-            .toLowerCase()
-            .includes("password has expired")
-        );
-
-      if (
-        err.response?.status === 403 &&
-        (
-          responseData?.errorCode === "PASSWORD_EXPIRED" ||
-          passwordExpiryMessage
-        )
-      ) {
-
-        sessionStorage.removeItem("svAdminToken");
-        sessionStorage.removeItem("svAdminUsername");
-
-        setPasswordExpired(true);
-
-        setError(
-          "Your password has expired. Please change your password."
-        );
-
-        return;
-      }
+      if (handlePasswordExpiry(responseData)) return;
 
       let errorMessage =
         "Unable to sign in. Please try again.";
@@ -320,6 +298,7 @@ const ShreeVaniAdminLogin = () => {
                 </button>
               </div>
 
+              {successMessage && <p role="status" className="sv-admin-login-success">{successMessage}</p>}
               {/* Error */}
               {error && (
                 <p
@@ -346,6 +325,7 @@ const ShreeVaniAdminLogin = () => {
                   className="sv-admin-change-password-btn"
                   onClick={() =>
                     navigate("/shree-vani/admin/expired-password", {
+                      replace: true,
                       state: {
                         username: username.trim()
                       }

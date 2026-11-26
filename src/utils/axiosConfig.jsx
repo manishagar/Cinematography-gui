@@ -35,13 +35,28 @@ api.interceptors.request.use(
     const token =
       sessionStorage.getItem("svAdminToken") ||
       localStorage.getItem("authToken");
-    const isLoginRequest = config.url?.endsWith("/admin/users/admin/login");
+    const method = (config.method || "get").toUpperCase();
+    const target = new URL(config.url || "", config.baseURL || CLEAN_BASE_URL);
+    const isPublicAuthRequest = target.origin === new URL(CLEAN_BASE_URL).origin && (
+      (method === "GET" && target.pathname === "/admin/users/admin/login") ||
+      (method === "PUT" && target.pathname === "/admin/users/admin/user/changeExpiredPassword")
+    );
 
-    if (token && !isLoginRequest) {
+    if (isPublicAuthRequest) {
+      if (typeof config.headers?.delete === "function") {
+        config.headers.delete("Authorization");
+      } else if (config.headers) {
+        delete config.headers.Authorization;
+        delete config.headers.authorization;
+      }
+      return config;
+    }
+
+    if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
 
-    if (token && !isLoginRequest && config.method) {
+    if (token && config.method) {
       const userData = decodeToken(token);
       const method = config.method.toUpperCase();
 
