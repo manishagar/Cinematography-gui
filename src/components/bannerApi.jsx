@@ -41,7 +41,7 @@ function extractMessages(data) {
     .map(item =>
       typeof item === 'string'
         ? item
-        : item?.defaultMessage || item?.message || ''
+        : item?.field ? `${item.field}: ${item.defaultMessage || item.message || ''}` : item?.defaultMessage || item?.message || ''
     )
     .flatMap(message => message.split('\n'))
     .map(message => message.trim())
@@ -86,18 +86,27 @@ export function getFieldErrors(error) {
     );
 
     if (match) {
-      const field = match[1].split('.').pop();
+      const key = match[1].split('.').pop();
+      const field = key === 'file' ? 'image' : key;
       const text = match[2].trim();
 
       if (knownFields.includes(field)) {
-        fields[field] = fields[field]
-          ? `${fields[field]}\n${text}`
-          : text;
+        fields[field] = [...new Set([...(fields[field]?.split('\n') || []), text])].join('\n');
       }
     }
   });
 
   return fields;
+}
+
+export function getGeneralErrors(error) {
+  const fields = getFieldErrors(error);
+  return [...new Set(extractMessages(getResponseData(error)).filter(message => {
+    const match = message.match(/^([a-zA-Z][\w.]*)\s*:\s*(.+)$/);
+    if (!match) return true;
+    const key = match[1].split('.').pop();
+    return !Object.hasOwn(fields, key === 'file' ? 'image' : key);
+  }))].join('\n');
 }
 
 export function apiError(error) {
@@ -146,9 +155,9 @@ export async function createBanner(details, file) {
   }
 
   const form = new FormData();
-  form.append('details', new Blob([JSON.stringify(details)], { type: 'application/json' }));
-  if (details.bannerType === 'IMAGE' && file) form.append('image', file);
-  const { data } = await api.post('/admin/users/admin/banners', form, { headers: headers() });
+  form.append('bannerDetails', new Blob([JSON.stringify(details)], { type: 'application/json' }));
+  if (details.bannerType === 'IMAGE' && file) form.append('file', file);
+  const { data } = await api.post('/admin/users/admin/banner/add', form, { headers: headers() });
   validateResponse(data);
   return data.data;
 }
@@ -156,12 +165,12 @@ export async function listBanners(page = 0, admin = false, signal) {
   const { data } = await api.get(admin ? '/admin/users/admin/banners' : '/api/public/banners', {
     params: { page, size: 12 }, signal, ...(admin ? { headers: headers() } : {}),
   });
-  if (data.status !== 'SUCCESS') throw new Error(responseMessage(data) || 'Unable to load banners.');
+  if (String(data?.status || '').toUpperCase() !== 'SUCCESS') throw new Error(responseMessage(data) || 'Unable to load banners.');
   return data.data;
 }
 export async function deactivateBanner(id) {
   const { data } = await api.delete(`/admin/users/admin/banners/${id}`, { headers: headers() });
-  if (data.status !== 'SUCCESS') throw new Error(responseMessage(data) || 'Unable to deactivate banner.');
+  if (String(data?.status || '').toUpperCase() !== 'SUCCESS') throw new Error(responseMessage(data) || 'Unable to deactivate banner.');
 }
 export async function fetchBannerImage(path, admin = false, signal) {
   const { data } = await api.get(path, {
